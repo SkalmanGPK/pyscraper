@@ -1,0 +1,22 @@
+# === Python & Enviroment ===
+venv/
+.venv/
+**/__pycache__/
+*.py[cod]
+
+# === Docker ===
+# Ignore local data volumes if LocalStack saves to disc in project
+.localstack/
+docker/.data/
+
+# === Terraform ===
+# Ignore downloaded providers and local status (Important!)
+.terraform/
+#.tfstate
+#.tfstate.backup
+#.tfvars
+#.tfvars.json
+
+# === OS ===
+.DS_Store
+Thumbs.db
