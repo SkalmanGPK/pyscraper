@@ -13,6 +13,7 @@ def fetch_page(url: str) -> str:
     try:
         response = requests.get(url, headers=headers, timeout=10)
         response.raise_for_status()
+        response.encoding = "utf-8"
         return response.text
     except requests.exceptions.Timeout:
         print(f"Timeout: {url} didn't answer within 10 seconds")
@@ -47,24 +48,25 @@ def save_to_s3(data):
 # Extracts articletitles and links from HTML. Missing fields are assigned None instead of breaking parse.
 def parse_data(html: str) -> list[dict]:
     soup = BeautifulSoup(html, "html.parser")
-    articles = []
+    books = []
 
-    for element in soup.find_all("h2", class="article-title"):
-        title = element.text.strip() if element else None
+    for article in soup.find_all("article", class_="product_pod"):
+        title_element = article.find("h3")
+        title = title_element.find("a").get("title") if title_element else None
 
-        link_element = element.find("a")
-        link = link_element.get("href") if link_element else None
+        price_element = article.find("p", class_="price_color")
+        price = price_element.text.strip() if price_element else None
+
         if title:
-            articles.append({"title": title, "link": link})
-    return articles
-
-
+            books.append({"title": title, "price": price})
+    return books
 def main():
-    url = "https://example.com"
+    url = "https://books.toscrape.com"
 
     html = fetch_page(url)
     data = parse_data(html)
-    save_to_s3(data)
+    print(json.dumps(data, indent=2, ensure_ascii=False))
+    # save_to_s3(data)
 
 
 if __name__ == "__main__":
